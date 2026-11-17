@@ -50,8 +50,7 @@ export function describePlaybackParts(g: Graph, s: Sonification): string[] {
   ]
 }
 export const describeMapping = (g: Graph, s: Sonification) => describePlaybackParts(g, s).join(' ')
+/** Spoken when the listener presses Stop: where, then what. */
 export function describeStop(g: Graph, p: PlaybackPosition): string {
-  const t = observationAt(g, p.x)
-  const estimate = interpolation(g) === 'linear' && Math.abs(t - Math.round(t)) > 1e-8
-  return `Stopped at the latest sampled position. ${g.xLabel}: ${formatX(g, p.x)}. ${g.yLabel}: ${formatValue(g, p.value)}.${estimate ? ' This is an estimate between recorded observations.' : ''}`
+  return `${formatX(g, p.x)}. ${formatValue(g, p.value)}.`
 }

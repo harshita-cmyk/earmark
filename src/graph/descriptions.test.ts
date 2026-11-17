@@ -7,20 +7,18 @@ describe('descriptive graph context', () => {
   it('expands months and thousands and labels all reference notes without changing raw data', () => {
     const g = getGraph('test-ambiguous-rise'), original = JSON.stringify(g)
     const text = preambleText(buildPreamble(sonify(g), g))
-    expect(text).toContain('from January to December')
-    expect(text).toContain('12 ordered observations')
-    expect(text).toContain('thousands of users')
-    expect(text).toContain('lowest recorded value is 42,000 users')
-    expect(text).toContain('highest recorded value is 58,000 users')
-    expect(text).toContain('starting reference note')
-    expect(text).toContain('Each semitone represents 500 users')
+    expect(text).toContain('Y axis: Active users, thousands of users.')
+    expect(text).toContain('Lowest: 42,000 users.')
+    expect(text).toContain('Highest: 58,000 users.')
+    expect(text).toContain('Starting: 42,000 users.')
+    expect(text).toContain('Reference: 500 users apart.')
     expect(JSON.stringify(g)).toBe(original)
     expect(formatValue({ ...g, valueUnit: { name: 'volts', description: 'volts', scale: 1 } }, 0.000000005)).toBe('0.000000005 volts')
   })
   it('never discloses extrema locations in a reference sentence for Test graphs', () => {
     for (const g of GRAPH_LIBRARY.filter((g) => g.stage === 'test')) {
       const items = buildPreamble(sonify(g), g)
-      const references = items.flatMap((i) => 'say' in i && /(?:lowest|highest) recorded value/.test(i.say) ? [i.say] : [])
+      const references = items.flatMap((i) => 'say' in i && /^(?:Lowest|Highest):/.test(i.say) ? [i.say] : [])
       expect(references).toHaveLength(2)
       for (const sentence of references) {
         for (const p of g.points) expect(sentence).not.toContain(formatX(g, p.x))
@@ -34,18 +32,17 @@ describe('descriptive graph context', () => {
     for (const g of GRAPH_LIBRARY) {
       const s = sonify(g), text = preambleText(buildPreamble(s, g))
       expect(describeAxes(g)).toHaveLength(2)
-      for (const label of [g.title, 'horizontal axis', 'vertical axis', 'lowest recorded value', 'highest recorded value', '6 seconds']) expect(text).toContain(label)
+      for (const label of [g.title, 'X axis:', 'Y axis:', 'Lowest:', 'Highest:', 'Starting:', 'Reference:', 'Length: 6 seconds']) expect(text).toContain(label)
       expect(text).not.toContain('undefined')
-      for (const item of buildPreamble(s, g)) if ('say' in item) expect(item.say.length).toBeLessThan(250)
+      // the whole header stays short: no sentence longer than a label plus a value
+      for (const item of buildPreamble(s, g)) if ('say' in item) expect(item.say.length).toBeLessThan(90)
     }
   })
   it('formats a categorical interpolation honestly as between categories', () => {
     const g = getGraph('temperature')
     expect(formatX(g, 3.5)).toBe('50 percent of the way from April to May')
     const text = describeStop(g, { graphId: g.id, index: 1, elapsedMs: 2000, x: 3.5, value: 64.5 })
-    expect(text).toContain('Month: 50 percent of the way from April to May')
-    expect(text).toContain('Temperature: 64.5 degrees Fahrenheit')
-    expect(text).toContain('estimate between recorded observations')
+    expect(text).toBe('50 percent of the way from April to May. 64.5 degrees Fahrenheit.')
   })
   it('explains numerical duration-to-domain mapping and categorical step sampling', () => {
     const numeric = { ...getGraph('rising'), xUnit: 'seconds' }
@@ -56,6 +53,6 @@ describe('descriptive graph context', () => {
   })
   it('describes the configured pitch interval, not an assumed semitone', () => {
     const g = getGraph('rising'), s = sonify(g, { stepSemitones: 2 })
-    expect(preambleText(buildPreamble(s, g))).toContain('Each 2-semitone step')
+    expect(preambleText(buildPreamble(s, g))).toContain('apart per 2 semitones.')
   })
 })

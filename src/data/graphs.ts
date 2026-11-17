@@ -34,7 +34,7 @@ function graph(
       name: COUNT_UNITS[labels.yLabel] ?? 'data units', scale: 1,
       description: COUNT_UNITS[labels.yLabel] ?? 'data units',
     } } : {}),
-    ...(!labels.xLabels && ['Day', 'Step'].includes(labels.xLabel) ? { xDescription: `${labels.xLabel.toLowerCase()} index (starting at zero)`, xUnit: `${labels.xLabel.toLowerCase()}s` } : {}),
+    ...(!labels.xLabels && ['Day', 'Step'].includes(labels.xLabel) ? { xDescription: `${labels.xLabel.toLowerCase()} index`, xUnit: `${labels.xLabel.toLowerCase()}s` } : {}),
     ...(labels.xLabel === 't' ? { xDescription: 'sample index across one sine-wave cycle', xUnit: 'sample-index units' } : {}),
     ...labels,
     stage,

@@ -11,7 +11,7 @@
  *  - optional glissando / continuous mode for the comparison condition
  */
 import { axisPosition, evaluateGraph, observationAt, rawX, validateGraph } from '../graph/coordinates.ts'
-import { describeAxes, describePlaybackParts, formatValue } from '../graph/descriptions.ts'
+import { formatValue, valueUnit } from '../graph/descriptions.ts'
 import { DEFAULT_OPTIONS } from '../types.ts'
 import type { Anchor, Graph, Note, PreambleItem, ProtocolOptions, Sonification } from '../types.ts'
 
@@ -136,21 +136,34 @@ export function sonify(graph: Graph, overrides: Partial<ProtocolOptions> = {}): 
   }
 }
 
-/** Descriptive narration labels every reference; it never gives extrema positions. */
+const seconds = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 })
+
+/**
+ * The spoken header: core facts only, one short label each, in a fixed order
+ * the listener learns once. Reference notes play right after their value.
+ *
+ *   Title.  X axis: ...  Y axis: ...
+ *   Lowest: v [note]  Highest: v [note]  Starting: v [note]
+ *   Reference: step [note][note]  Length: n seconds.
+ */
 export function buildPreamble(s: Sonification, graph: Graph): PreambleItem[] {
   const note = (midi: number): PreambleItem => ({ note: midi, name: midiToName(midi), ms: 450 })
-  const [x, y] = describeAxes(graph)
+  const xUnit = graph.xUnit ? `, ${graph.xUnit}` : ''
+  const perStep = s.stepSemitones === 1 ? '' : ` per ${s.stepSemitones} semitones`
   return [
-    { say: `${graph.title}.` }, { say: x }, { say: y },
-    { say: `The lowest recorded value is ${formatValue(graph, s.trough.value)}. Here is the lowest reference note.` },
+    { say: `${graph.title}.` },
+    { say: `X axis: ${graph.xDescription ?? graph.xLabel}${xUnit}.` },
+    { say: `Y axis: ${graph.yDescription ?? graph.yLabel}, ${valueUnit(graph).description}.` },
+    { say: `Lowest: ${formatValue(graph, s.trough.value)}.` },
     note(s.trough.midi),
-    { say: `The highest recorded value is ${formatValue(graph, s.peak.value)}. Here is the highest reference note.` },
+    { say: `Highest: ${formatValue(graph, s.peak.value)}.` },
     note(s.peak.midi),
-    { say: `The graph starts at ${formatValue(graph, s.start.value)}. Here is the starting reference note.` },
+    { say: `Starting: ${formatValue(graph, s.start.value)}.` },
     note(s.start.midi),
-    { say: `Each ${s.stepSemitones === 1 ? 'semitone' : `${s.stepSemitones}-semitone step`} represents ${formatValue(graph, s.unitsPerStep)}. Here are two notes one pitch step apart.` },
-    note(s.trough.midi), note(s.trough.midi + s.stepSemitones),
-    ...describePlaybackParts(graph, s).map((say) => ({ say })),
+    { say: `Reference: ${formatValue(graph, s.unitsPerStep)} apart${perStep}.` },
+    note(s.trough.midi),
+    note(s.trough.midi + s.stepSemitones),
+    { say: `Length: ${seconds.format(s.durationMs / 1000)} seconds.` },
   ]
 }
 
