@@ -26,16 +26,16 @@ Pressing **Stop** at any moment reads out the value at that point in the graph.
 
 ## What's in the app
 
-- **Tutorial** teaches the format with simple shapes (a steady rise, a spike, a
-  plateau) and asks shape-recognition questions.
-- **Test** (`#test`) uses realistic series such as monthly active users, an
-  airline share price, or hourly humidity, and asks about actual values and
-  positions. The chart stays hidden until you have answered.
-- **Playground** (`#playground`) lets you pick any graph, play it, and inspect
-  the exact note sequence.
+- **Training** shows the graph while it plays, with a playhead, so you can
+  match what you hear to what you see. It uses simple shapes (a steady rise, a
+  spike, a plateau) and asks shape-recognition questions.
+- **Test** (`#test`) is the same loop with the graph hidden until you have
+  answered. It uses realistic series such as monthly active users, an airline
+  share price, or hourly humidity, and asks about actual values and positions.
 
-Each question follows the same loop: listen, answer, see the graph revealed with
-feedback, move on. A results screen summarises the run.
+Each question follows the same loop: listen, answer, see the graph with
+feedback, move on. A results screen summarises the run. An unlisted engine page
+at `#playground` lets you pick any graph and inspect its exact note sequence.
 
 ## Running it locally
 

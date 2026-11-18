@@ -2,8 +2,9 @@
  * App shell. Owner: Person 4.
  *
  * Routes (hash-based, no router dependency):
- *   #            the lesson
- *   #playground  engine test page: pick any graph, play it, see the notes
+ *   #            Training: hear the clip, see the graph, answer questions
+ *   #test        Test: the same loop with the graph hidden until you answer
+ *   #playground  engine page (unlisted): pick any graph, play it, see the notes
  */
 import { useEffect, useState } from 'react'
 import { Lesson } from './components/Lesson.tsx'
@@ -29,18 +30,15 @@ export default function App() {
       <header>
         <h1>Earmark</h1>
         <nav className="nav">
+          <a href="#" aria-current={!playground && !testMode ? 'page' : undefined}>
+            Training
+          </a>
           <a href="#test" aria-current={testMode ? 'page' : undefined}>
             Test
           </a>
-          <a href="#" aria-current={!playground && !testMode ? 'page' : undefined}>
-            Tutorial
-          </a>
-          <a href="#playground" aria-current={playground ? 'page' : undefined}>
-            Playground
-          </a>
         </nav>
       </header>
-      {playground ? <Playground /> : <Lesson key={testMode ? 'test' : 'tutorial'} mode={testMode ? 'test' : 'tutorial'} />}
+      {playground ? <Playground /> : <Lesson key={testMode ? 'test' : 'training'} mode={testMode ? 'test' : 'tutorial'} showGraph={!testMode} />}
     </main>
   )
 }

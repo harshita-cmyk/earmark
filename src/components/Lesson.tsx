@@ -4,6 +4,10 @@
  *
  * Flow:  intro -> [listen -> answer -> reveal] x N -> results
  *
+ * `showGraph` is the only difference between Training and Test: Training
+ * shows the chart (with the playhead) while the clip plays and while the
+ * listener answers; Test keeps it hidden until the answer is in.
+ *
  * TODO (Person 4): persist progress in localStorage, limit replays per
  * question (and record the count), keyboard shortcuts (space = play).
  */
@@ -24,7 +28,7 @@ import { ProtocolIntro } from './ProtocolIntro.tsx'
 import { QuestionCard } from './QuestionCard.tsx'
 import { Results } from './Results.tsx'
 
-export function Lesson({ mode = 'tutorial' }: { mode?: 'tutorial' | 'test' }) {
+export function Lesson({ mode = 'tutorial', showGraph = mode !== 'test' }: { mode?: 'tutorial' | 'test'; showGraph?: boolean }) {
   const questionBank = mode === 'test' ? TEST_QUESTIONS : QUESTIONS
 
   const [questions, setQuestions] = useState(() => orderQuestions(questionBank))
@@ -109,6 +113,10 @@ export function Lesson({ mode = 'tutorial' }: { mode?: 'tutorial' | 'test' }) {
       <StoppedPosition graph={graph} position={player.stoppedPosition} />
       {player.error && <p role="alert">{player.error}</p>}
 
+      {(showGraph || phase.stage === 'reveal') && (
+        <GraphReveal graph={graph} sonification={sonification} activePosition={activePosition} />
+      )}
+
       <QuestionCard
         question={question}
         chosenIndex={current?.chosenIndex ?? null}
@@ -118,12 +126,9 @@ export function Lesson({ mode = 'tutorial' }: { mode?: 'tutorial' | 'test' }) {
       />
 
       {phase.stage === 'reveal' && (
-        <>
-          <GraphReveal graph={graph} sonification={sonification} activePosition={activePosition} />
-          <button type="button" onClick={() => goToQuestion(phase.index + 1)}>
-            {phase.index + 1 < questions.length ? 'Next question' : 'See results'}
-          </button>
-        </>
+        <button type="button" onClick={() => goToQuestion(phase.index + 1)}>
+          {phase.index + 1 < questions.length ? 'Next question' : 'See results'}
+        </button>
       )}
     </section>
   )
