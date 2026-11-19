@@ -49,18 +49,20 @@ export function Playground() {
       </section>
 
       <section className="stage">
-        <ProtocolSummary graph={series} sonification={sonification} />
-        <LineChart series={series} activePosition={chartPosition(sonification, player.activeIndex, player.stoppedPosition)} />
-        <StoppedPosition graph={series} position={player.stoppedPosition} />
+        <ProtocolSummary graph={series} sonification={sonification} playback={<>
+            <StoppedPosition graph={series} position={player.stoppedPosition} />
+            {player.error && <p role="alert">{player.error}</p>}
+            <PlayerControls
+              status={player.status}
+              speakPreamble={speakPreamble}
+              onToggleSpeak={setSpeakPreamble}
+              onPlay={() => void player.play(sonification, speakPreamble ? preamble : undefined)}
+              onStop={() => player.stopAndAnnounce(series)}
+            />
+          </>}>
+          <LineChart series={series} activePosition={chartPosition(sonification, player.activeIndex, player.stoppedPosition)} />
+        </ProtocolSummary>
         <DataTable graph={series} />
-        {player.error && <p role="alert">{player.error}</p>}
-        <PlayerControls
-          status={player.status}
-          speakPreamble={speakPreamble}
-          onToggleSpeak={setSpeakPreamble}
-          onPlay={() => void player.play(sonification, speakPreamble ? preamble : undefined)}
-          onStop={() => player.stopAndAnnounce(series)}
-        />
       </section>
 
       <section className="details">

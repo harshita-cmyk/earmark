@@ -27,9 +27,9 @@ export default function App() {
 
   return (
     <main className="app">
-      <header>
-        <h1>Earmark</h1>
-        <nav className="nav">
+      <header className="app-header">
+        <h1><img src={`${import.meta.env.BASE_URL}images/earmark-logo.webp`} alt="Earmark" width="410" height="113" /></h1>
+        <nav className="nav" aria-label="Prototype">
           <a href="#" aria-current={!playground && !testMode ? 'page' : undefined}>
             Training
           </a>

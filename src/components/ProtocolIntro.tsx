@@ -20,14 +20,17 @@ export function ProtocolIntro({ player, onStart, mode = 'tutorial' }: { player: 
     <p>{mode === 'test'
       ? 'In the test the graph stays hidden until you have answered.'
       : 'In training the graph is shown while it plays, so you can match what you hear to what you see. The test uses the same loop with the graph hidden.'}</p>
-    <ProtocolSummary graph={sample} sonification={sonification} headingLevel={3} />
-    {mode === 'tutorial' && <><LineChart series={sample} activePosition={chartPosition(sonification, player.activeIndex, player.stoppedPosition)} /><DataTable graph={sample} /></>}
+    <ProtocolSummary graph={sample} sonification={sonification} headingLevel={3} playback={<>
+        <StoppedPosition graph={sample} position={player.stoppedPosition} />
+        {player.error && <p role="alert">{player.error}</p>}
+        <div className="controls">
+          <button type="button" onClick={() => busy ? player.stopAndAnnounce(sample) : void player.play(sonification, preamble)}>{busy ? 'Stop' : 'Play sample'}</button>
+          <button type="button" className="secondary" onClick={onStart}>{mode === 'test' ? 'Start test' : 'Start training'}</button>
+        </div>
+      </>}>
+      {mode === 'tutorial' && <LineChart series={sample} activePosition={chartPosition(sonification, player.activeIndex, player.stoppedPosition)} />}
+    </ProtocolSummary>
     <details><summary>Read the sample narration</summary><p>{preambleText(preamble)}</p></details>
-    <StoppedPosition graph={sample} position={player.stoppedPosition} />
-    {player.error && <p role="alert">{player.error}</p>}
-    <div className="controls">
-      <button type="button" onClick={() => busy ? player.stopAndAnnounce(sample) : void player.play(sonification, preamble)}>{busy ? 'Stop' : 'Play sample'}</button>
-      <button type="button" className="secondary" onClick={onStart}>{mode === 'test' ? 'Start test' : 'Start training'}</button>
-    </div>
+    {mode === 'tutorial' && <DataTable graph={sample} />}
   </section>
 }

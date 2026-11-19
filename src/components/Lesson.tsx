@@ -22,6 +22,7 @@ import { INITIAL_LISTENING, listeningReducer } from '../quiz/listening.ts'
 import type { AnswerRecord, LessonPhase } from '../types.ts'
 import { ProtocolSummary } from './ProtocolSummary.tsx'
 import { StoppedPosition } from './StoppedPosition.tsx'
+import { DataTable } from './DataTable.tsx'
 import { GraphReveal } from './GraphReveal.tsx'
 import { ProgressBar } from './ProgressBar.tsx'
 import { ProtocolIntro } from './ProtocolIntro.tsx'
@@ -93,30 +94,30 @@ export function Lesson({ mode = 'tutorial', showGraph = mode !== 'test' }: { mod
   const busy = player.status !== 'idle' && player.status !== 'error'
   const activePosition = chartPosition(sonification, player.activeIndex, player.stoppedPosition)
 
+  const graphVisible = showGraph || phase.stage === 'reveal'
+
   return (
     <section className="lesson">
-      <ProtocolSummary graph={graph} sonification={sonification} />
-      <ProgressBar current={phase.index + 1} total={questions.length} />
+      <ProtocolSummary graph={graph} sonification={sonification} playback={<>
+          <ProgressBar current={phase.index + 1} total={questions.length} />
 
-      <div className="controls">
-        <button type="button" onClick={busy ? () => player.stopAndAnnounce(graph) : () => void play()}>
-          {busy ? 'Stop' : listening.attempted ? 'Replay' : 'Play'}
-        </button>
-      </div>
+          <div className="controls">
+            <button type="button" onClick={busy ? () => player.stopAndAnnounce(graph) : () => void play()}>
+              {busy ? 'Stop' : listening.attempted ? 'Replay' : 'Play'}
+            </button>
+          </div>
 
-      <p id={instructionsId} className="hint" role="status">
-        {current ? 'Answer recorded. Continue to the next question when ready.'
-          : hasListened ? 'Graph playback complete. You can answer now or replay the graph.'
-          : listening.attempted && !busy ? 'Playback did not complete. Replay the entire graph to answer.'
-          : 'Listen to the entire graph before answering. Answers become available when playback finishes.'}
-      </p>
-      <StoppedPosition graph={graph} position={player.stoppedPosition} />
-      {player.error && <p role="alert">{player.error}</p>}
-
-      {(showGraph || phase.stage === 'reveal') && (
-        <GraphReveal graph={graph} sonification={sonification} activePosition={activePosition} />
-      )}
-
+          <p id={instructionsId} className="hint" role="status">
+            {current ? 'Answer recorded. Continue to the next question when ready.'
+              : hasListened ? 'Graph playback complete. You can answer now or replay the graph.'
+              : listening.attempted && !busy ? 'Playback did not complete. Replay the entire graph to answer.'
+              : 'Listen to the entire graph before answering. Answers become available when playback finishes.'}
+          </p>
+          <StoppedPosition graph={graph} position={player.stoppedPosition} />
+          {player.error && <p role="alert">{player.error}</p>}
+        </>}>
+        {graphVisible && <GraphReveal graph={graph} sonification={sonification} activePosition={activePosition} includeTable={false} />}
+      </ProtocolSummary>
       <QuestionCard
         question={question}
         chosenIndex={current?.chosenIndex ?? null}
@@ -130,6 +131,7 @@ export function Lesson({ mode = 'tutorial', showGraph = mode !== 'test' }: { mod
           {phase.index + 1 < questions.length ? 'Next question' : 'See results'}
         </button>
       )}
+      {graphVisible && <DataTable graph={graph} />}
     </section>
   )
 }
